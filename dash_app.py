@@ -29,8 +29,6 @@ class Plotter():
 
         x, y = np.ogrid[:500, :500]
 
-        # mask = (x - 250) ** 2 + (y - 250) ** 2 > 300 ** 2
-        # mask = 255 * mask.astype(int)
         cloud = WordCloud(background_color='white',
                           max_words=100,)
                           # interpolation='bilinear',)
@@ -74,19 +72,13 @@ class Plotter():
 
         layout = html.Div([
             html.Embed(src=muziek_link, height=40, width=350),
-            # dcc.Link(html.Button('Spotify ⬀'), href=spoti_link, target='_blank'),
+
             html.Embed(src=spoti_link_emb, height=80, width=300),
-            # html.Br(),
             html.H6('Summary:'),
-            # html.P('Selection: {}'.format(df.iloc[idx].selection)),
             html.P('{0:.0f} annotators - preference ({1:.0f}%) - familiarity ({2:.0f}%) - tempo ({3:.1f} BPM)'.format(df.iloc[idx].num_users, 
                                                                                                                       float(df.iloc[idx].pref) * 100,
                                                                                                                       float(df.iloc[idx].fam) * 100, 
                                                                                                                       df.iloc[idx].tempo)),
-            # html.P('{0:.0f} annotators - preference ({1:.0f}%) - familiarity ({2:.0f}%)'.format(df.iloc[idx].num_users, 
-            #                                                                                     float(df.iloc[idx].pref) * 100,
-            #                                                                                     float(df.iloc[idx].fam) * 100)),
-            
             html.Div(children=[            
 
             html.Div(children=[
@@ -386,7 +378,6 @@ class Plotter():
 
 
 if __name__ == "__main__":
-
     # instanciate Plotter
     plotter = Plotter()
 
@@ -402,5 +393,5 @@ if __name__ == "__main__":
     app.layout = plotter.create_layout(app)
 
     plotter.run_callbacks(app)
-    app.run_server(debug=True)
+    app.run_server(host='0.0.0.0', debug=True)
 

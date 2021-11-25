@@ -4,7 +4,7 @@ Source code for visualisation platform presented to IEEE Transactions on Affecti
 
 -- Juan Sebastián Gómez-Cañón, Nicolás Gutiérrez-Páez, Lorenzo Porcaro, Alastair Porter, Estefanía Cano, Perfecto Herrera, Aggelos Gkiokas, Patricia Santos, Davinia Hernández-Leo, Cynthia Liem, and Emilia Gómez
 
-# Abstract
+## Abstract
 
 We present a data set for the analysis of personalized Music Emotion Recognition (MER) systems.
 We developed the Music Enthusiasts platform aiming to improve the gathering and analysis of the so-called “ground truth” needed as input to such systems.
@@ -15,7 +15,9 @@ An extensive analysis of the participants' ratings is presented and a novel pers
 Results evidence that using the “collective judgement” as prior knowledge for active learning allows for more effective personalization of MER systems for this particular data set.
 Our data set is publicly available and we invite researchers to use it for testing MER systems.
 
-# Usage
+## Usage
+
+Simply compose the docker image:
 
 ```
 docker-compose up

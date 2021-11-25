@@ -215,8 +215,23 @@ class Plotter():
                             vertical=False,
                         ),
                     ],
-
                 ),
+
+                html.Div(
+                    style={"margin": "25px 5px 30px 0px"},
+                    children=["Num. Annotators",  
+                        dcc.RangeSlider(
+                            id="slider-users",
+                            min=0,
+                            max=np.max(self.data.num_users),
+                            step=1,
+                            value=[0, np.max(self.data.num_users)],
+                            tooltip={"placement": "bottom", "always_visible": True},
+                            vertical=False,
+                        ),
+                    ],
+                ),
+
                 ], className='four columns'),
                 ]),
                     
@@ -248,9 +263,11 @@ class Plotter():
                 Input("slider-mode", "value"),
                 Input("slider-key", "value"),
                 Input("slider-tempo", "value"),
+                Input("slider-users", "value"),
+                
             ],
         )
-        def display_plot(av_rep, spoti_filt, sl_mode, sl_key, sl_tempo):
+        def display_plot(av_rep, spoti_filt, sl_mode, sl_key, sl_tempo, sl_users):
             this_df = self.data
 
             # filter with musical properties
@@ -260,7 +277,8 @@ class Plotter():
                 this_df = this_df[this_df['key'] == sl_key].reset_index()
             if sl_tempo != [0, 220]:
                 this_df = this_df[(this_df['tempo'] >= sl_tempo[0]) & (this_df['tempo'] <= sl_tempo[1])].reset_index()
-
+            if sl_users != [0, np.max(self.data.num_users)]:
+                this_df = this_df[(this_df['num_users'] >= sl_users[0]) & (this_df['num_users'] <= sl_users[1])].reset_index()
             # show arousal valence representations
             if av_rep == 'spoti_api':
                 aro_col = 'energy'
@@ -288,6 +306,8 @@ class Plotter():
             else:
                 this_color = this_df[spoti_filt]
                 show_scale = True
+
+
 
             axes = dict(title="Test", showgrid=True, zeroline=True, showticklabels=False)
 
@@ -362,7 +382,7 @@ class Plotter():
                 this_color = this_df[spoti_filt]
                 show_scale = True
 
-            text = 'Select a point from the plot for more information'
+            text = 'Each point in the plot is a song, select one to view more information.'
             if click_data:
                 click_point_np = np.array([click_data['points'][0][i] for i in ['x', 'y']]).astype(np.float64)
                 bool_mask = (this_df.loc[:, [val_col, aro_col]].eq(click_point_np).all(axis=1))
@@ -374,7 +394,7 @@ class Plotter():
                     # except:
                     #     return None
             else:
-                return 'Select a point from the plot for more information'
+                return 'Each point in the plot is a song, select one to view more information.'
 
 
 if __name__ == "__main__":

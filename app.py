@@ -405,11 +405,17 @@ if __name__ == "__main__":
 
     app = dash.Dash(
         __name__,
-        meta_tags=[{"name": "viewport", "content": "width=device-width"}],
+        meta_tags=[{"name": "viewport",
+                    "content": "width=device-width",
+                    'routes_pathname_prefix': '/', 
+                    "requests_pathname_prefix": "/vp/"}],
         external_stylesheets=external_stylesheets,
         )
 
     server = app.server
+    app.url_base_pathname = "/viewport/"
+    app.routes_pathname_prefix = app.url_base_pathname
+
     app.layout = plotter.create_layout(app)
 
     plotter.run_callbacks(app)

@@ -5,7 +5,7 @@ services:
     build: ./
     environment:
       FLASK_ENV: development
-    command: python3 dash_app.py
+    command: python3 app.py
     volumes:
     - ./:/code
     ports:

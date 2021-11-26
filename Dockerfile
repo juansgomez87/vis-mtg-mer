@@ -18,4 +18,4 @@ COPY . /code
 
 EXPOSE 8050
 
-CMD ["python3", "/code/dash_app.py"]
+CMD ["python3", "/code/app.py"]

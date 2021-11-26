@@ -455,9 +455,8 @@ if __name__ == "__main__":
                     "content": "width=device-width"}],
         external_stylesheets=external_stylesheets,
         routes_pathname_prefix='/',
-        requests_pathname_prefix='/',
-        )
-    app.scripts.config.serve_locally=True
+        requests_pathname_prefix='/vis-mtg-mer/',
+        serve_locally=False)
 
     server = app.server
 

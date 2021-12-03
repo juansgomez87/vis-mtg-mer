@@ -1,7 +1,18 @@
+#!/usr/bin/env python3
+"""
+Music emotion visualization app on Dash
+
+
+Copyright 2021, J.S. Gómez-Cañón
+Licensed under GNU AFFERO GENERAL PUBLIC LICENSE
+"""
+
 import json
 import pdb
 import pandas as pd
 from tqdm import tqdm
+from sklearn import preprocessing
+import krippendorff
 
 from collections import Counter
 
@@ -26,8 +37,34 @@ def aro_val_to_quads(aro, val):
 	return quad
 
 
-def main(anno, df):
+def get_info_per_song(anno, tags):
+    song_ids = anno.externalID.unique().tolist()
+    anno['arousalValue'] = anno['arousalValue'].astype(int)
+    anno['valenceValue'] = anno['valenceValue'].astype(int)
 
+    le = preprocessing.LabelEncoder()
+    le.fit(tags)
+    anno['moodValueEnc'] = le.transform(anno['moodValue'])
+
+    quadrant = pd.pivot_table(anno,
+                             index=['userid'],
+                             columns=['externalID'],
+                             values=['quadrant'])
+    arousal = pd.pivot_table(anno,
+                             index=['userid'],
+                             columns=['externalID'],
+                             values=['arousalValue'])
+    valence = pd.pivot_table(anno,
+                             index=['userid'],
+                             columns=['externalID'],
+                             values=['valenceValue'])
+    emotion = pd.pivot_table(anno,
+                             index=['userid'],
+                             columns=['externalID'],
+                             values=['moodValueEnc'])
+    return quadrant, arousal, valence, emotion
+
+def main(anno, df):
 	tags = anno.moodValue.unique()
 	songs = df.cdr_track_num.unique().tolist()
 	for s in tqdm(songs):
@@ -64,6 +101,7 @@ def main(anno, df):
 if __name__ == "__main__":
 	fn = 'data_24_11_2021.json'
 	csv = 'summary.csv'
+	tags = ['joy', 'power', 'surprise', 'anger', 'tension', 'fear', 'sadness', 'bitterness', 'peace', 'tenderness', 'transcendence']
 	data = load_json(fn)
 
 	anno = pd.DataFrame(data['annotations'])
@@ -72,6 +110,15 @@ if __name__ == "__main__":
 	users = pd.DataFrame(data['users'])
 
 	df = pd.read_csv(csv, sep='\t', index_col=0)
+
+	quadrant, arousal, valence, emotion = get_info_per_song(anno, tags)
+
+	print('Krippendorff:')
+	print('Quadrants = {}'.format(krippendorff.alpha(reliability_data=quadrant, level_of_measurement='nominal')))
+	print('Arousal = {}'.format(krippendorff.alpha(reliability_data=arousal, level_of_measurement='nominal')))
+	print('Valence = {}'.format(krippendorff.alpha(reliability_data=valence, level_of_measurement='nominal')))
+	print('Emotion = {}'.format(krippendorff.alpha(reliability_data=emotion, level_of_measurement='nominal')))
+
 	main(anno, df)
 
 

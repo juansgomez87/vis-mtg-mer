@@ -1,7 +1,18 @@
+#!/usr/bin/env python3
+"""
+Music emotion visualization app on Dash
+
+
+Copyright 2021, J.S. Gómez-Cañón
+Licensed under GNU AFFERO GENERAL PUBLIC LICENSE
+"""
+
 import numpy as np
 import pandas as pd
 import os
 import subprocess
+import krippendorff
+import json
 
 import dash
 from dash import dcc
@@ -16,9 +27,66 @@ class Plotter():
     def __init__(self):
         self.data = pd.read_csv('summary_anno.csv', sep='\t', index_col=0)
         self.tags = ['joy', 'power', 'surprise', 'anger', 'tension', 'fear', 'sadness', 'bitterness', 'peace', 'tenderness', 'transcendence']
+        self.tags_enc = {v: k for k, v in enumerate(self.tags)}
         self.quads = {'Q1': '1','Q2': '2','Q3': '3','Q4': '4'}
-        # images
- 
+        self.filters = {'pos_dan': {'column': 'danceability', 'value': 0.5, 'operation': '>'},
+                        'neg_dan': {'column': 'danceability', 'value': 0.5, 'operation': '<'},
+                        'pos_aco': {'column': 'acousticness', 'value': 0.5, 'operation': '>'},
+                        'neg_aco': {'column': 'acousticness', 'value': 0.5, 'operation': '<'},
+                        'pos_pop': {'column': 'popularity', 'value': 50, 'operation': '>'},
+                        'neg_pop': {'column': 'popularity', 'value': 50, 'operation': '<'}}
+        # pure annotation data
+        anno_data = self.load_json('data_24_11_2021.json')
+        self.anno = pd.DataFrame(anno_data['annotations'])
+        self.anno['quadrant'] = list(map(self.aro_val_to_quads, self.anno['arousalValue'].tolist(), self.anno['valenceValue'].tolist()))
+        self.anno['moodValueEnc'] = self.anno['moodValue'].map(self.tags_enc)
+        self.anno['arousalValue'] = self.anno['arousalValue'].astype(int)
+        self.anno['valenceValue'] = self.anno['valenceValue'].astype(int)
+        self.users = pd.DataFrame(anno_data['users'])
+
+    def aro_val_to_quads(self, aro, val):
+        aro, val = int(aro), int(val)
+        if aro == 1 and val == 1:
+            quad = 1
+        elif aro == 1 and val == -1:
+            quad = 2
+        elif aro == -1 and val == -1:
+            quad = 3
+        elif aro == -1 and val == 1:
+            quad = 4
+        return quad
+
+    def load_json(self, filename):
+        with open(filename, 'r') as f:
+            data = f.read()
+        data = json.loads(data)
+        return data
+
+    def get_info_per_song(self, anno, tags):
+
+        quadrant = pd.pivot_table(anno,
+                                 index=['userid'],
+                                 columns=['externalID'],
+                                 values=['quadrant'])
+        alpha_quad = krippendorff.alpha(reliability_data=quadrant, level_of_measurement='nominal')
+        arousal = pd.pivot_table(anno,
+                                 index=['userid'],
+                                 columns=['externalID'],
+                                 values=['arousalValue'])
+        alpha_aro = krippendorff.alpha(reliability_data=arousal, level_of_measurement='nominal')
+        valence = pd.pivot_table(anno,
+                                 index=['userid'],
+                                 columns=['externalID'],
+                                 values=['valenceValue'])
+        alpha_val = krippendorff.alpha(reliability_data=valence, level_of_measurement='nominal')
+        emotion = pd.pivot_table(anno,
+                                 index=['userid'],
+                                 columns=['externalID'],
+                                 values=['moodValueEnc'])
+        alpha_emo = krippendorff.alpha(reliability_data=emotion, level_of_measurement='nominal')
+        return alpha_quad, alpha_aro, alpha_val, alpha_emo
+
+
     def get_word_cloud(self, string):
         stopwords = set(STOPWORDS)
         stopwords.add('emotion')
@@ -43,7 +111,7 @@ class Plotter():
         df_subset = df.iloc[idx]
         spoti_link_emb = 'https://open.spotify.com/embed/track/{}'.format(df.loc[idx, 'track_id'])
         spoti_link = 'https://open.spotify.com/track/{}'.format(df.loc[idx, 'track_id'])
-        muziek_link = 'https://www.muziekweb.nl/Embed/{}'.format(df.loc[idx, 'cdr_track_num'])
+        muziek_link = 'https://www.muziekweb.nl/Embed/{}?theme=static&color=dark'.format(df.loc[idx, 'cdr_track_num'])
 
         # figure quads
         fig_quads = go.Figure()
@@ -70,7 +138,7 @@ class Plotter():
         fig_cld.update_yaxes(visible=False)
 
         layout = html.Div([
-            html.Embed(src=muziek_link, height=40, width=350, style={'marginRight': 50, 'marginLeft': 50}),
+            html.Embed(src=muziek_link, height=60, width=260, style={'marginRight': 50, 'marginLeft': 50}),
 
             html.Embed(src=spoti_link_emb, height=80, width=300, style={'marginRight': 50, 'marginLeft': 50}),
             # html.H6('Summary:'),
@@ -136,6 +204,7 @@ class Plotter():
 
                     html.Div(children=['Select AV representation:',
                             dcc.Dropdown(
+                                style={"margin": "0px 5px 5px 0px"},
                                 id='dropdown-arousalvalence',
                                 placeholder='Select AV representation:',
                                 searchable=False,
@@ -143,15 +212,15 @@ class Plotter():
                                 options=[
                                     {'label': 'Spotify API', 'value':'spoti_api'},
                                     {'label': 'Spotify  API + Standarization', 'value':'norm'},
-                                    {'label': 'TROMPA participants', 'value':'users'},
                                 ],
                                 value='spoti_api',
                             ),
                         ],
                     ),
 
-                    html.Div(children=['Colorize using Spotify API:',
+                    html.Div(children=['Colorize using features:',
                             dcc.Dropdown(
+                                style={"margin": "0px 5px 5px 0px"},
                                 id='dropdown-color',
                                 placeholder='Colorize using Spotify API:',
                                 searchable=False,
@@ -171,8 +240,33 @@ class Plotter():
                         ],
                     ),
 
+                    html.Div(children=['Select filters:',
+                            dcc.Dropdown(
+                                style={"margin": "0px 5px 5px 0px"},
+                                id='dropdown-filters',
+                                placeholder='Select filters:',
+                                searchable=False,
+                                clearable=False,
+                                options=[
+                                    {'label': 'None', 'value':'none'},
+                                    {'label': 'Positive Preference', 'value':'pos_pref'},
+                                    {'label': 'Negative Preference', 'value':'neg_pref'},
+                                    {'label': 'Positive Familiarity', 'value':'pos_fam'},
+                                    {'label': 'Negative Familiarity', 'value':'neg_fam'},
+                                    {'label': 'Danceability (>0.5)', 'value':'pos_dan'},
+                                    {'label': 'Danceability (<0.5)', 'value':'neg_dan'},
+                                    {'label': 'Acousticness (>0.5)', 'value':'pos_aco'},
+                                    {'label': 'Acousticness (<0.5)', 'value':'neg_aco'},
+                                    {'label': 'Popularity (>50)', 'value':'pos_pop'},
+                                    {'label': 'Popularity (<50)', 'value':'neg_pop'},
+                                ],
+                                value='none',
+                            ),
+                        ],
+                    ),
+
                     html.Div(
-                        style={"margin": "20px 5px 20px 0px"},
+                        style={"margin": "0px 5px 5px 0px"},
                         children=["Mode",
                             dcc.Slider(
                                 id="slider-mode",
@@ -188,7 +282,7 @@ class Plotter():
                         ],
                     ),
                     html.Div(
-                        style={"margin": "25px 5px 30px 0px"},
+                        style={"margin": "0px 5px 5px 0px"},
                         children=["Tempo",  
                             dcc.RangeSlider(
                                 id="slider-tempo",
@@ -203,7 +297,7 @@ class Plotter():
                     ),
 
                     html.Div(
-                        style={"margin": "25px 5px 30px 0px"},
+                        style={"margin": "0px 5px 5px 0px"},
                         children=["Key",  
                             dcc.Slider(
                                 id="slider-key",
@@ -231,7 +325,7 @@ class Plotter():
                     ),
 
                     html.Div(
-                        style={"margin": "25px 5px 30px 0px"},
+                        style={"margin": "0px 5px 5px 0px"},
                         children=["Num. Annotators",  
                             dcc.RangeSlider(
                                 id="slider-users",
@@ -244,6 +338,9 @@ class Plotter():
                             ),
                         ],
                     ),
+
+                    html.Div(id='agreement-text',
+                             children=[]),
 
                 ], className='four columns'),
                 ]),
@@ -304,7 +401,8 @@ class Plotter():
 
     def run_callbacks(self, app):
         @app.callback(
-            Output("graph-arousal-valence", "figure"),
+            [Output("graph-arousal-valence", "figure"),
+            Output('agreement-text', 'children')],
             [
                 Input("dropdown-arousalvalence", "value"),
                 Input("dropdown-color", "value"),
@@ -312,11 +410,12 @@ class Plotter():
                 Input("slider-key", "value"),
                 Input("slider-tempo", "value"),
                 Input("slider-users", "value"),
-                
+                Input('dropdown-filters', 'value')
             ],
         )
-        def display_plot(av_rep, spoti_filt, sl_mode, sl_key, sl_tempo, sl_users):
+        def display_plot(av_rep, spoti_filt, sl_mode, sl_key, sl_tempo, sl_users, oth_filt):
             this_df = self.data
+
             list_opacity = (this_df.num_users / np.max(this_df.num_users)) ** 0.18
 
             # filter with musical properties
@@ -328,6 +427,7 @@ class Plotter():
                 this_df = this_df[(this_df['tempo'] >= sl_tempo[0]) & (this_df['tempo'] <= sl_tempo[1])].reset_index()
             if sl_users != [0, np.max(self.data.num_users)]:
                 this_df = this_df[(this_df['num_users'] >= sl_users[0]) & (this_df['num_users'] <= sl_users[1])].reset_index()
+
             # show arousal valence representations
             if av_rep == 'spoti_api':
                 aro_col = 'energy'
@@ -335,20 +435,16 @@ class Plotter():
                 title = 'Spotify API'
                 y_line = 0.5
                 x_line = 0.5
+                quads_pos = {'Q1': [1, 1], 'Q2': [0, 1], 'Q3': [0, 0], 'Q4': [1, 0]}
             elif av_rep == 'norm':
                 aro_col = 'norm_energy'
                 val_col = 'norm_valence'
                 title = 'Standarization'
                 y_line = 0.0
                 x_line = 0.0
-            elif av_rep == 'users':
-                # TODO!!!
-                aro_col = 'energy'
-                val_col = 'valence'
-                title = 'Users (TODO)'
-                y_line = 0.5
-                x_line = 0.5
+                quads_pos = {'Q1': [4, 6], 'Q2': [-2.5, 6], 'Q3': [-2.5, -2.5], 'Q4': [4, -2.5]}
 
+            # colorize with respect to acoustic features
             if spoti_filt == 'none':
                 this_color = None
                 show_scale = False
@@ -356,6 +452,42 @@ class Plotter():
                 this_color = this_df[spoti_filt]
                 show_scale = True
                 list_opacity = np.ones(list_opacity.shape)
+
+            # filter with respect to preference and familiarity
+            this_songs = this_df.cdr_track_num.unique().tolist()
+            this_anno = self.anno[self.anno.externalID.isin(this_songs)]
+            if oth_filt != 'none' and (oth_filt.endswith('_pref') or (oth_filt.endswith('_fam'))):
+                if oth_filt == 'pos_fam':
+                    this_anno = this_anno[this_anno.knownSong == '1'].reset_index()
+                elif oth_filt == 'neg_fam':
+                    this_anno = this_anno[this_anno.knownSong == '0'].reset_index()
+                elif oth_filt == 'pos_pref':
+                    this_anno = this_anno[this_anno.favSong == '1'].reset_index()
+                elif oth_filt == 'neg_pref':
+                    this_anno = this_anno[this_anno.favSong == '0'].reset_index()
+                this_songs_filt = this_anno.externalID.unique().tolist()
+                this_df = this_df[this_df.cdr_track_num.isin(this_songs_filt)].reset_index()
+            elif oth_filt != 'none' and not (oth_filt.endswith('_pref') or (oth_filt.endswith('_fam'))):
+                if self.filters[oth_filt]['operation'] == '>':
+                    this_df = this_df[this_df[self.filters[oth_filt]['column']] > self.filters[oth_filt]['value']].reset_index()
+                elif self.filters[oth_filt]['operation'] == '<':
+                    this_df = this_df[this_df[self.filters[oth_filt]['column']] < self.filters[oth_filt]['value']].reset_index()
+                this_songs = this_df.cdr_track_num.unique().tolist()
+                this_anno = self.anno[self.anno.externalID.isin(this_songs)]
+
+
+            # calculate inter-rater agreement
+            alpha_quad, alpha_aro, alpha_val, alpha_emo = self.get_info_per_song(this_anno, self.tags_enc)
+            txt_agr = html.P(['Inter-rater agreement from selection:', 
+                             html.Br(),
+                             'Quadrants: {:.3f}'.format(alpha_quad),
+                             html.Br(),
+                             'Arousal: {:.3f}'.format(alpha_aro),
+                             html.Br(),
+                             'Valence: {:.3f}'.format(alpha_val),
+                             html.Br(),
+                             'Emotions: {:.3f}'.format(alpha_emo),
+                             html.Br()])
 
             axes = dict(title="Test", showgrid=True, zeroline=True, showticklabels=False)
 
@@ -384,9 +516,18 @@ class Plotter():
             figure.update_xaxes(title_text='Valence')
             figure.update_yaxes(title_text='Arousal')
             figure.add_hline(y=y_line)
-            figure.add_vline(x=x_line)            
+            figure.add_vline(x=x_line)
+            for k, v in quads_pos.items():
+                figure.add_annotation(x=v[0],
+                                      y=v[1],
+                                      text=k, 
+                                      font=dict(
+                                        size=16,
+                                        color="#000000"
+                                        ),
+                                      showarrow=False)    
 
-            return figure
+            return [figure, txt_agr]
 
         @app.callback(
             Output('click-information', 'children'),
@@ -417,11 +558,8 @@ class Plotter():
             elif av_rep == 'norm':
                 aro_col = 'norm_energy'
                 val_col = 'norm_valence'
-            elif av_rep == 'users':
-                # TODO!!!
-                aro_col = 'energy'
-                val_col = 'valence'
 
+            # colorize according to features
             if spoti_filt == 'none':
                 this_color = None
                 show_scale = False
@@ -454,8 +592,8 @@ if __name__ == "__main__":
         meta_tags=[{"name": "viewport",
                     "content": "width=device-width"}],
         external_stylesheets=external_stylesheets,
-        routes_pathname_prefix='/',
-        requests_pathname_prefix='/vis-mtg-mer/',
+        # routes_pathname_prefix='/',
+        # requests_pathname_prefix='/vis-mtg-mer/',
         serve_locally=False)
 
     server = app.server
@@ -463,5 +601,5 @@ if __name__ == "__main__":
     app.layout = plotter.create_layout(app)
 
     plotter.run_callbacks(app)
-    app.run_server(host='0.0.0.0', debug=False)
+    app.run_server(host='0.0.0.0', debug=True)
 

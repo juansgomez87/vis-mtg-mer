@@ -1,3 +1,7 @@
 .git
 __pycache__
-venv
+data/dataset_feats.csv
+models/
+img_shift/
+trompa-venv/
+xgboost/

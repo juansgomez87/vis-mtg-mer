@@ -25,18 +25,18 @@ from wordcloud import WordCloud, STOPWORDS
 
 class Plotter():
     def __init__(self):
-        self.data = pd.read_csv('summary_anno.csv', sep='\t', index_col=0)
+        self.data = pd.read_csv('./data/summary_anno.csv', sep='\t', index_col=0)
         self.tags = ['joy', 'power', 'surprise', 'anger', 'tension', 'fear', 'sadness', 'bitterness', 'peace', 'tenderness', 'transcendence']
         self.tags_enc = {v: k for k, v in enumerate(self.tags)}
         self.quads = {'Q1': '1','Q2': '2','Q3': '3','Q4': '4'}
-        self.filters = {'pos_dan': {'column': 'danceability', 'value': 0.5, 'operation': '>'},
-                        'neg_dan': {'column': 'danceability', 'value': 0.5, 'operation': '<'},
-                        'pos_aco': {'column': 'acousticness', 'value': 0.5, 'operation': '>'},
-                        'neg_aco': {'column': 'acousticness', 'value': 0.5, 'operation': '<'},
-                        'pos_pop': {'column': 'popularity', 'value': 50, 'operation': '>'},
-                        'neg_pop': {'column': 'popularity', 'value': 50, 'operation': '<'}}
+        self.filters = {'pos_dan': {'column': 'danceability', 'value': 0.35, 'operation': '>'},
+                        'neg_dan': {'column': 'danceability', 'value': 0.35, 'operation': '<'},
+                        'pos_aco': {'column': 'acousticness', 'value': 0.98, 'operation': '>'},
+                        'neg_aco': {'column': 'acousticness', 'value': 0.98, 'operation': '<'},
+                        'pos_pop': {'column': 'popularity', 'value': 0.1, 'operation': '>'},
+                        'neg_pop': {'column': 'popularity', 'value': 0.1, 'operation': '<'}}
         # pure annotation data
-        anno_data = self.load_json('data_24_11_2021.json')
+        anno_data = self.load_json('./data/data_24_11_2021.json')
         self.anno = pd.DataFrame(anno_data['annotations'])
         self.anno['quadrant'] = list(map(self.aro_val_to_quads, self.anno['arousalValue'].tolist(), self.anno['valenceValue'].tolist()))
         self.anno['moodValueEnc'] = self.anno['moodValue'].map(self.tags_enc)
@@ -253,12 +253,12 @@ class Plotter():
                                     {'label': 'Negative Preference', 'value':'neg_pref'},
                                     {'label': 'Positive Familiarity', 'value':'pos_fam'},
                                     {'label': 'Negative Familiarity', 'value':'neg_fam'},
-                                    {'label': 'Danceability (>0.5)', 'value':'pos_dan'},
-                                    {'label': 'Danceability (<0.5)', 'value':'neg_dan'},
-                                    {'label': 'Acousticness (>0.5)', 'value':'pos_aco'},
-                                    {'label': 'Acousticness (<0.5)', 'value':'neg_aco'},
-                                    {'label': 'Popularity (>50)', 'value':'pos_pop'},
-                                    {'label': 'Popularity (<50)', 'value':'neg_pop'},
+                                    {'label': 'Danceability (>0.35)', 'value':'pos_dan'},
+                                    {'label': 'Danceability (<0.35)', 'value':'neg_dan'},
+                                    {'label': 'Acousticness (>0.98)', 'value':'pos_aco'},
+                                    {'label': 'Acousticness (<0.98)', 'value':'neg_aco'},
+                                    {'label': 'Popularity (>0.1)', 'value':'pos_pop'},
+                                    {'label': 'Popularity (<0.1)', 'value':'neg_pop'},
                                 ],
                                 value='none',
                             ),
@@ -367,29 +367,31 @@ class Plotter():
                 children=[
 
                 html.P('Created by Juan Sebastián Gómez-Cañón',
-                        style={'text-align': 'center'},),
+                        style={'text-align': 'center',
+                               'color': 'grey',
+                               'font-size': '10px'},),
                 html.Div(
                     children=[
                     html.A(                
                         html.Img(src=app.get_asset_url('juan_gomez.png'), alt='juan_logo', height=25),
                         href='https://juansgomez87.github.io/',
                         target='_blank',
-                        style={"margin": "0px 30px 0px 30px"}),
+                        style={"margin": "0px 15px 0px 15px"}),
                      html.A(                
                         html.Img(src=app.get_asset_url('twitter.png'), alt='twitter', height=25),
                         href='https://twitter.com/juan_s_gomez',
                         target='_blank',
-                        style={"margin": "0px 30px 0px 30px"}),
+                        style={"margin": "0px 15px 0px 15px"}),
                     html.A(                
                         html.Img(src=app.get_asset_url('github.png'), alt='github', height=25),
                         href='https://github.com/juansgomez87',
                         target='_blank',
-                        style={"margin": "0px 30px 0px 30px"}),               
+                        style={"margin": "0px 15px 0px 15px"}),               
                     html.A(                
                         html.Img(src=app.get_asset_url('scholar.png'), alt='scholar', height=25),
                         href='https://scholar.google.com/citations?user=IvIQqUwAAAAJ&hl=en',
                         target='_blank',
-                        style={"margin": "0px 30px 0px 30px"}),               
+                        style={"margin": "0px 15px 0px 15px"}),               
                     ],
                     style={'text-align': 'center'},),
                 ]),
@@ -469,12 +471,11 @@ class Plotter():
                 this_df = this_df[this_df.cdr_track_num.isin(this_songs_filt)].reset_index()
             elif oth_filt != 'none' and not (oth_filt.endswith('_pref') or (oth_filt.endswith('_fam'))):
                 if self.filters[oth_filt]['operation'] == '>':
-                    this_df = this_df[this_df[self.filters[oth_filt]['column']] > self.filters[oth_filt]['value']].reset_index()
+                    this_df = this_df[this_df[self.filters[oth_filt]['column']] >= self.filters[oth_filt]['value']].reset_index()
                 elif self.filters[oth_filt]['operation'] == '<':
                     this_df = this_df[this_df[self.filters[oth_filt]['column']] < self.filters[oth_filt]['value']].reset_index()
                 this_songs = this_df.cdr_track_num.unique().tolist()
                 this_anno = self.anno[self.anno.externalID.isin(this_songs)]
-
 
             # calculate inter-rater agreement
             alpha_quad, alpha_aro, alpha_val, alpha_emo = self.get_info_per_song(this_anno, self.tags_enc)
@@ -592,8 +593,9 @@ if __name__ == "__main__":
         meta_tags=[{"name": "viewport",
                     "content": "width=device-width"}],
         external_stylesheets=external_stylesheets,
-        # routes_pathname_prefix='/',
-        # requests_pathname_prefix='/vis-mtg-mer/',
+        # comment two following lines for local tests
+        routes_pathname_prefix='/',
+        requests_pathname_prefix='/vis-mtg-mer/',
         serve_locally=False)
 
     server = app.server
@@ -601,5 +603,5 @@ if __name__ == "__main__":
     app.layout = plotter.create_layout(app)
 
     plotter.run_callbacks(app)
-    app.run_server(host='0.0.0.0', debug=True)
+    app.run_server(host='0.0.0.0', debug=False)
 

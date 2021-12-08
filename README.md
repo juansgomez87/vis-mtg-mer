@@ -1,8 +1,8 @@
-# Visualization MTG-MER dataset
+# MTG-MER: an open data set for personalized Music Emotion Recognition
 
-Source code for visualisation platform presented to IEEE Transactions on Affective Computing 2021.
+Source code to reproduce experiments and visualisation platform presented to IEEE Transactions on Affective Computing 2021.
 
--- Juan Sebastián Gómez-Cañón, Nicolás Gutiérrez-Páez, Lorenzo Porcaro, Alastair Porter, Estefanía Cano, Perfecto Herrera, Aggelos Gkiokas, Patricia Santos, Davinia Hernández-Leo, Cynthia Liem, and Emilia Gómez
+-- Juan Sebastián Gómez-Cañón, Nicolás Gutiérrez-Páez, Lorenzo Porcaro, Alastair Porter, Estefanía Cano, Perfecto Herrera, Aggelos Gkiokas, Patricia Santos, Davinia Hernández-Leo, Casper Karreman, Cynthia Liem, and Emilia Gómez
 
 ## Abstract
 
@@ -15,16 +15,65 @@ An extensive analysis of the participants' ratings is presented and a novel pers
 Results evidence that using the “collective judgement” as prior knowledge for active learning allows for more effective personalization of MER systems for this particular data set.
 Our data set is publicly available and we invite researchers to use it for testing MER systems.
 
-## Usage
-
-Simply compose the docker image:
-
-```
-docker-compose up
-```
-
 ## Online Website
 
 With UPF-VPN: http://mirlab-web1.s.upf.edu:8050/vis-mtg-mer
 
 External: https://trompa-mtg.upf.edu/vis-mtg-mer
+
+## Reproduce results
+
+#### To run with a virtual environment:
+
+Create the virtual environment:
+```
+python3 -m venv trompa-venv
+source trompa-venv/bin/activate
+pip3 install -r requirements.txt
+```
+
+Copy the `sklearn.py` into the virtual environment library:
+```
+cp xgboost/sklearn.py trompa-venv/lib/python3.8/site-packages/xgboost
+```
+
+#### To merge annotations with playlist summary:
+
+```
+python3 merge_research_data.py
+```
+
+#### To obtain generalized word shift graphs from textual data:
+We use Shannon's entropy to produce the shift graphs in the paper. 
+
+```
+python3 nlp_shifterator.py -shift [proportion [prop], Shannon-Entropy [shan], Jensen-Shannon Divergence [jsd]]
+```
+
+#### To reproduce personalization results:
+
+Contact juansebastian.gomez[at]upf[dot]edu to receive the processed feature set. We use only data from users that annotated more than 80 excerpts, and perform 10 iterations with 5 queries each.
+
+```
+python3 evaluate_dataset.py -n 80 -e 10 -q 5 
+```
+The previous step will train all models for all users - it will take approximately 2 hours. After the process is complete, you need to generate the plots:
+```
+python3 make_plots.py
+```
+
+
+## Usage Dash App for visualization
+
+To test the visualization app locally, just run:
+```
+python3 app.py
+```
+
+Or simply compose the docker image:
+
+```
+docker-compose up
+```
+
+

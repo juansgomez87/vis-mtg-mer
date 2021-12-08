@@ -1,4 +1,10 @@
-venv/*
+trompa-venv/
+data/dataset_feats.csv
+models/users/*
+models/tests/*
+
+!models/users/.gitkeep
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

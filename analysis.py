@@ -16,6 +16,9 @@ import matplotlib.pyplot as plt
 import itertools
 from scipy import stats
 
+from collections import Counter
+import krippendorff
+
 def make_plots(df, user_list, cons_types, mod_types, path):
     # confidence intervals
     c_ints = {90: 1.64, 95: 1.96, 99: 2.33, 99.5: 2.58}
@@ -54,18 +57,7 @@ def get_reformed_dict(in_dict):
 
 
 def get_stats(df, user_list, cons_types, mod_types, path):
-    include_zero = False
-
-    # if include_zero:
-    #     # include 0 annotations
-    #     print('Including point with 0 annotations')
-    #     data_cols = df.columns[4:].tolist()
-    # else:
-    #     # without 0 annotations
-    #     print('Not including point with 0 annotations')
     data_cols = df.columns[5:].tolist()
-
-
     cons_comb = list(itertools.combinations(cons_types, 2))
 
     print('one-sided t-test by model by point')
@@ -95,7 +87,6 @@ def get_stats(df, user_list, cons_types, mod_types, path):
     t_test_df.to_csv(os.path.join(path, 't_test.csv'))
 
     print('per user calculation of lineal tendency')
-
     slopes = {}
     for u_id in user_list:
         slopes[u_id] = {}
@@ -147,22 +138,90 @@ def get_stats(df, user_list, cons_types, mod_types, path):
     plt.savefig(os.path.join(path, 'effective.svg'))
     plt.show()
 
+    return slope_df
 
+def analyze_users(slope_df, anno, users):
     # analyze user behavior
     slope_df['pos'] += 0
+    sum_us = slope_df.groupby(['user'])['pos'].sum()
+    lo_users = sum_us[sum_us < sum_us.mean() - sum_us.std()].index.tolist()
+    med_users = sum_us[(sum_us > sum_us.mean() - sum_us.std()) & (sum_us < sum_us.mean() + sum_us.std())].index.tolist()
+    hi_users = sum_us[sum_us > sum_us.mean() + sum_us.std()].index.tolist()
+    print('Amount of effective personalization ensembles per user:')
+    print(sum_us)
+    # encode data
+    tags = ['joy', 'power', 'surprise', 'anger', 'tension', 'fear', 'sadness', 'bitterness', 'peace', 'tenderness', 'transcendence']
+    tags_enc = {v: k for k, v in enumerate(tags)}
+    anno['quadrant'] = list(map(aro_val_to_quads, anno['arousalValue'].tolist(), anno['valenceValue'].tolist()))
+    anno['moodValueEnc'] = anno['moodValue'].map(tags_enc)
+    anno['arousalValue'] = anno['arousalValue'].astype(int)
+    anno['valenceValue'] = anno['valenceValue'].astype(int)
+    # split annotations
+    anno_hi = anno[anno.userid.isin(hi_users)]
+    anno_lo = anno[anno.userid.isin(lo_users)]
+    anno_med = anno[anno.userid.isin(med_users)]
 
+    # calculate agreement
+    alpha_quad, alpha_aro, alpha_val, alpha_emo = get_info_per_song(anno_hi)
+    print('Agreement for high personalization:\nQuadrant: {}\nArousal: {}\nValence: {}\nEmotion: {}\n'.format(alpha_quad, alpha_aro, alpha_val, alpha_emo))
+    alpha_quad, alpha_aro, alpha_val, alpha_emo = get_info_per_song(anno_med)
+    print('Agreement for low personalization:\nQuadrant: {}\nArousal: {}\nValence: {}\nEmotion: {}\n'.format(alpha_quad, alpha_aro, alpha_val, alpha_emo))
+    alpha_quad, alpha_aro, alpha_val, alpha_emo = get_info_per_song(anno_lo)
+    print('Agreement for low personalization:\nQuadrant: {}\nArousal: {}\nValence: {}\nEmotion: {}\n'.format(alpha_quad, alpha_aro, alpha_val, alpha_emo))
     pdb.set_trace()
 
+def aro_val_to_quads(aro, val):
+    aro, val = int(aro), int(val)
+    if aro == 1 and val == 1:
+        quad = 1
+    elif aro == 1 and val == -1:
+        quad = 2
+    elif aro == -1 and val == -1:
+        quad = 3
+    elif aro == -1 and val == 1:
+        quad = 4
+    return quad
 
+def load_json(filename):
+    with open(filename, 'r') as f:
+        data = f.read()
+    data = json.loads(data)
+    return data
+
+def get_info_per_song(anno):
+    quadrant = pd.pivot_table(anno,
+                             index=['userid'],
+                             columns=['externalID'],
+                             values=['quadrant'])
+    alpha_quad = krippendorff.alpha(reliability_data=quadrant, level_of_measurement='nominal')
+    arousal = pd.pivot_table(anno,
+                             index=['userid'],
+                             columns=['externalID'],
+                             values=['arousalValue'])
+    alpha_aro = krippendorff.alpha(reliability_data=arousal, level_of_measurement='nominal')
+    valence = pd.pivot_table(anno,
+                             index=['userid'],
+                             columns=['externalID'],
+                             values=['valenceValue'])
+    alpha_val = krippendorff.alpha(reliability_data=valence, level_of_measurement='nominal')
+    emotion = pd.pivot_table(anno,
+                             index=['userid'],
+                             columns=['externalID'],
+                             values=['moodValueEnc'])
+    alpha_emo = krippendorff.alpha(reliability_data=emotion, level_of_measurement='nominal')
+    return alpha_quad, alpha_aro, alpha_val, alpha_emo
 
 
 if __name__ == "__main__":
     # usage: python3 make_plots.py
-    path_models_users = './models/users_q5_e10/'
+    path_models_users = './models/users/'
+    path_models_users = './models/tests/users_q5_e10/'
+
     # load data and format for plotting
     res_list = [os.path.join(root, f) for root, dirs, files in os.walk(path_models_users) for f in files if f.lower().endswith('f1.csv')]
     df_list = [pd.read_csv(_, index_col=[0, 1]) for _ in res_list]
     user_list = [_.split('/')[3] for _ in res_list]
+    user_list = [_.split('/')[4] for _ in res_list]
 
     modes = ['hc', 'mix', 'mc', 'rand']
     models = ['classifier_gnb', 'classifier_sgd', 'classifier_xgb']
@@ -185,5 +244,12 @@ if __name__ == "__main__":
 
     make_plots(struc_df.reset_index(), user_list, modes, models, path_models_users)
 
-    get_stats(struc_df.reset_index(), user_list, modes, models, path_models_users)
+    sl_df = get_stats(struc_df.reset_index(), user_list, modes, models, path_models_users)
+
+    dataset_anno = './data/data_24_11_2021.json'
+    data = load_json(dataset_anno)
+    anno = pd.DataFrame(data['annotations'])
+    users = pd.DataFrame(data['users'])
+
+    analyze_users(sl_df, anno, users)
     

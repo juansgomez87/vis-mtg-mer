@@ -57,11 +57,11 @@ Contact juansebastian.gomez[at]upf[dot]edu to receive the processed feature set.
 ```
 python3 evaluate_dataset.py -n 80 -e 10 -q 5 
 ```
-The previous step will train all models for all users - it will take approximately 2 hours. After the process is complete, you need to generate the plots:
+The previous step will train all models for all users - it will take approximately 2 hours. After the process is complete, you need to analyze the results:
 ```
-python3 make_plots.py
+python3 analysis.py
 ```
-
+This will output the plots from the papers, the statistical analysis, and the user behavior analysis. 
 
 ## Usage Dash App for visualization
 

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 This module provides a function to compute the Krippendorff's alpha statistical measure of the agreement achieved
 when coding a set of units based on the values of a variable.
@@ -9,6 +10,9 @@ Thank you to @bryant1410!
 
 It has been modified to account for "insufficient variation", where alpha is undetermined
 and for numerical variations.
+
+Copyright 2021, J.S. Gómez-Cañón
+Licensed under GNU AFFERO GENERAL PUBLIC LICENSE
 """
 
 import numpy as np

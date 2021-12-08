@@ -60,7 +60,6 @@ class Evaluator():
         self.seed = np.random.seed(1987)
 
 
-
     def aro_val_to_quads(self, aro, val):
         aro, val = int(aro), int(val)
         if aro == 1 and val == 1:

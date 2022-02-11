@@ -19,13 +19,14 @@ Our data set is publicly available and we invite researchers to use it for testi
 
 With UPF-VPN: http://mirlab-web1.s.upf.edu:8050/vis-mtg-mer
 
-External: https://trompa-mtg.upf.edu/vis-mtg-mer
+External: https://trompa.mtg.sb.upf.edu/vis-mtg-mer/
 
 ## Reproduce results
 
 #### To run with a virtual environment:
 
 Create the virtual environment:
+
 ```
 python3 -m venv trompa-venv
 source trompa-venv/bin/activate
@@ -33,6 +34,7 @@ pip3 install -r requirements.txt
 ```
 
 Copy the `sklearn.py` into the virtual environment library:
+
 ```
 cp xgboost/sklearn.py trompa-venv/lib/python3.8/site-packages/xgboost
 ```
@@ -44,7 +46,8 @@ python3 merge_research_data.py
 ```
 
 #### To obtain generalized word shift graphs from textual data:
-We use Shannon's entropy to produce the shift graphs in the paper. 
+
+We use Shannon's entropy to produce the shift graphs in the paper.
 
 ```
 python3 nlp_shifterator.py -shift [proportion [prop], Shannon-Entropy [shan], Jensen-Shannon Divergence [jsd]]
@@ -55,17 +58,21 @@ python3 nlp_shifterator.py -shift [proportion [prop], Shannon-Entropy [shan], Je
 Contact juansebastian.gomez[at]upf[dot]edu to receive the processed feature set. We use only data from users that annotated more than 80 excerpts, and perform 10 iterations with 5 queries each.
 
 ```
-python3 evaluate_dataset.py -n 80 -e 10 -q 5 
+python3 evaluate_dataset.py -n 80 -e 10 -q 5
 ```
+
 The previous step will train all models for all users - it will take approximately 2 hours. After the process is complete, you need to analyze the results:
+
 ```
 python3 analysis.py
 ```
-This will output the plots from the papers, the statistical analysis, and the user behavior analysis. 
+
+This will output the plots from the papers, the statistical analysis, and the user behavior analysis.
 
 ## Usage Dash App for visualization
 
 To test the visualization app locally, just run:
+
 ```
 python3 app.py
 ```
@@ -75,5 +82,3 @@ Or simply compose the docker image:
 ```
 docker-compose up
 ```
-
-

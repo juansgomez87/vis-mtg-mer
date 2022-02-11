@@ -1,8 +1,8 @@
-# MTG-MER: an open data set for personalized Music Emotion Recognition
+# TROMPA-MER: an open data set for personalized Music Emotion Recognition
 
 Source code to reproduce experiments and visualisation platform presented to IEEE Transactions on Affective Computing 2021.
 
--- Juan Sebastián Gómez-Cañón, Nicolás Gutiérrez-Páez, Lorenzo Porcaro, Alastair Porter, Estefanía Cano, Perfecto Herrera, Aggelos Gkiokas, Patricia Santos, Davinia Hernández-Leo, Casper Karreman, Cynthia Liem, and Emilia Gómez
+-- Juan Sebastián Gómez-Cañón, Nicolás Gutiérrez-Páez, Lorenzo Porcaro, Alastair Porter, Estefanía Cano, Perfecto Herrera, Aggelos Gkiokas, Patricia Santos, Davinia Hernández-Leo, Casper Karreman, and Emilia Gómez
 
 ## Abstract
 

@@ -593,8 +593,8 @@ dash_app = dash.Dash(
                 "content": "width=device-width"}],
     external_stylesheets=external_stylesheets,
     # comment two following lines for local tests
-    routes_pathname_prefix='/',
-    requests_pathname_prefix='/vis-mtg-mer/',
+    # routes_pathname_prefix='/',
+    # requests_pathname_prefix='/vis-mtg-mer/',
     serve_locally=False)
 
 app = dash_app.server
@@ -605,5 +605,5 @@ plotter.run_callbacks(dash_app)
 
 
 if __name__ == "__main__":
-    app.run_server(host='0.0.0.0', debug=False)
+    dash_app.run_server(host='0.0.0.0', debug=False)
 

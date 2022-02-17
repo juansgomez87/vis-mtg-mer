@@ -38,3 +38,4 @@ tqdm==4.62.3
 Werkzeug==2.0.2
 wordcloud==1.8.1
 xgboost==1.3.3
+uwsgi

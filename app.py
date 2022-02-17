@@ -582,26 +582,28 @@ class Plotter():
                 return 'Each point in the plot is a song, select one to view more information.'
 
 
+# instanciate Plotter
+plotter = Plotter()
+
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+
+dash_app = dash.Dash(
+    __name__,
+    meta_tags=[{"name": "viewport",
+                "content": "width=device-width"}],
+    external_stylesheets=external_stylesheets,
+    # comment two following lines for local tests
+    routes_pathname_prefix='/',
+    requests_pathname_prefix='/vis-mtg-mer/',
+    serve_locally=False)
+
+app = dash_app.server
+
+dash_app.layout = plotter.create_layout(dash_app)
+
+plotter.run_callbacks(dash_app)
+
+
 if __name__ == "__main__":
-    # instanciate Plotter
-    plotter = Plotter()
-
-    external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
-    app = dash.Dash(
-        __name__,
-        meta_tags=[{"name": "viewport",
-                    "content": "width=device-width"}],
-        external_stylesheets=external_stylesheets,
-        # comment two following lines for local tests
-        routes_pathname_prefix='/',
-        requests_pathname_prefix='/vis-mtg-mer/',
-        serve_locally=False)
-
-    server = app.server
-
-    app.layout = plotter.create_layout(app)
-
-    plotter.run_callbacks(app)
     app.run_server(host='0.0.0.0', debug=False)
 

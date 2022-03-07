@@ -38,7 +38,8 @@ class Evaluator():
                  n_queries):
         """Constructor method
         """
-        dataset_anno = './data/data_24_11_2021.json'
+        # dataset_anno = './data/data_24_11_2021.json'
+        dataset_anno = './data/data_07_03_2022.json'
         dataset_fn = './data/dataset_feats.csv'
         self.queries = n_queries
         self.dataset = pd.read_csv(dataset_fn, sep=';')
@@ -50,10 +51,10 @@ class Evaluator():
         users = pd.DataFrame(data['users'])
         anno['quadrant'] = list(map(self.aro_val_to_quads, anno['arousalValue'].tolist(), anno['valenceValue'].tolist()))
 
-        all_users = [_ for _ in anno.userid.unique().tolist()]
-        self.user_anno_dict = {_: anno.externalID[anno.userid == _].tolist() for _ in all_users}
+        all_users = [_ for _ in anno.userId.unique().tolist()]
+        self.user_anno_dict = {_: anno.externalID[anno.userId == _].tolist() for _ in all_users}
         self.all_users = [k for k,v in self.user_anno_dict.items() if len(v) >= num_anno]
-        self.anno = anno[anno.userid.isin(self.all_users)]
+        self.anno = anno[anno.userId.isin(self.all_users)]
         self.all_modes = ['hc', 'mix', 'rand', 'mc']
         self.mod_list = [os.path.join(root, f) for root, dirs, files in os.walk(self.path_to_models) for f in files if f.lower().endswith('.pkl')]
         # self.dict_class = {0: 'Q1', 1: 'Q2', 2: 'Q3', 3: 'Q4'}
@@ -131,7 +132,7 @@ class Evaluator():
             # select data for this user
             this_songs = [_.lower() for _ in self.user_anno_dict[u_id]]
             this_dataset = self.dataset[self.dataset.s_id.isin(this_songs)]
-            this_anno_user = self.anno[self.anno.userid == u_id][['externalID', 'quadrant']].set_index('externalID')
+            this_anno_user = self.anno[self.anno.userId == u_id][['externalID', 'quadrant']].set_index('externalID')
             this_dict = {k.lower(): v for k, v in this_anno_user.to_dict()['quadrant'].items()}
             this_y = pd.DataFrame.from_dict(this_dict, orient='index').reindex(this_dataset.s_id).rename({0: 'quadrant'})
             # split to train and test data

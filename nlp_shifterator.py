@@ -51,13 +51,20 @@ def free_words_shift(anno, sh):
     print('Number of positive valence words: {}'.format(len(txt_pos.split(' '))))
     c_v = CountVectorizer(stop_words=stp_wrds)
     mat_pos = c_v.fit_transform([txt_pos])
-    pos_dict = {a: b for a, b in zip(c_v.get_feature_names_out(), mat_pos.toarray()[0].tolist())}
+    try:
+        pos_dict = {a: b for a, b in zip(c_v.get_feature_names_out(), mat_pos.toarray()[0].tolist())}
+    except:
+        pos_dict = {a: b for a, b in zip(c_v.get_feature_names(), mat_pos.toarray()[0].tolist())}
 
     txt_neg = ' '.join([_ for _ in anno_val_neg.freeMood.tolist() if _ != 'None'])
     print('Number of negative valence words: {}'.format(len(txt_pos.split(' '))))
     c_v = CountVectorizer(stop_words=stp_wrds)
     mat_neg = c_v.fit_transform([txt_neg])
-    neg_dict = {a: b for a, b in zip(c_v.get_feature_names_out(), mat_neg.toarray()[0].tolist())}
+    try:
+        neg_dict = {a: b for a, b in zip(c_v.get_feature_names_out(), mat_neg.toarray()[0].tolist())}
+    except:
+        neg_dict = {a: b for a, b in zip(c_v.get_feature_names(), mat_neg.toarray()[0].tolist())}
+
 
     fig, axi = plt.subplots(ncols=1, nrows=1, figsize=(10.5, 9), tight_layout=True, dpi=100)
     if sh == 'prop':
@@ -105,7 +112,10 @@ def reasoning_shift(anno, sh):
     print('Number of arousal/valence words: {}'.format(len(txt_core.split(' '))))
     c_v = CountVectorizer(stop_words=stp_wrds)
     mat_core = c_v.fit_transform([txt_core])
-    core_dict = {a: b for a, b in zip(c_v.get_feature_names_out(), mat_core.toarray()[0].tolist())}
+    try:
+        core_dict = {a: b for a, b in zip(c_v.get_feature_names_out(), mat_core.toarray()[0].tolist())}
+    except:
+        core_dict = {a: b for a, b in zip(c_v.get_feature_names(), mat_core.toarray()[0].tolist())}
 
     txt_emo = ' '.join([_ for _ in anno.moodComment.tolist() if _ != 'None'])
     # txt_free = ' '.join([_ for _ in anno.freeMood.tolist() if _ != 'None'])
@@ -113,7 +123,10 @@ def reasoning_shift(anno, sh):
     print('Number of emotion words: {}'.format(len(txt_emo.split(' '))))
     c_v = CountVectorizer(stop_words=stp_wrds)
     mat_mood = c_v.fit_transform([txt_emo])
-    mood_dict = {a: b for a, b in zip(c_v.get_feature_names_out(), mat_mood.toarray()[0].tolist())}
+    try:
+        mood_dict = {a: b for a, b in zip(c_v.get_feature_names_out(), mat_mood.toarray()[0].tolist())}
+    except:
+        mood_dict = {a: b for a, b in zip(c_v.get_feature_names(), mat_mood.toarray()[0].tolist())}
 
     fig, axi = plt.subplots(ncols=1, nrows=1, figsize=(10.5, 9), tight_layout=True, dpi=100)
     if sh == 'prop':
@@ -169,7 +182,8 @@ if __name__ == "__main__":
         print('Select valid wordshift method!')
         sys.exit(0)
  
-    fn = './data/data_24_11_2021.json'
+    # fn = './data/data_24_11_2021.json'
+    fn = './data/data_07_03_2022.json'
     tags = ['joy', 'power', 'surprise', 'anger', 'tension', 'fear', 'sadness', 'bitterness', 'peace', 'tenderness', 'transcendence']
     data = load_json(fn)
 

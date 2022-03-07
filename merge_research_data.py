@@ -67,7 +67,8 @@ def main(anno, df):
 
 
 if __name__ == "__main__":
-	fn = './data/data_24_11_2021.json'
+	# fn = './data/data_24_11_2021.json'
+	fn = './data/data_07_03_2022.json'
 	csv = './data/summary.csv'
 	tags = ['joy', 'power', 'surprise', 'anger', 'tension', 'fear', 'sadness', 'bitterness', 'peace', 'tenderness', 'transcendence']
 	data = load_json(fn)

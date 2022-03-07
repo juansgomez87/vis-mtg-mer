@@ -157,15 +157,15 @@ def analyze_users(slope_df, anno, users):
     anno['arousalValue'] = anno['arousalValue'].astype(int)
     anno['valenceValue'] = anno['valenceValue'].astype(int)
     # split annotations
-    anno_hi = anno[anno.userid.isin(hi_users)]
-    anno_lo = anno[anno.userid.isin(lo_users)]
-    anno_med = anno[anno.userid.isin(med_users)]
+    anno_hi = anno[anno.userId.isin(hi_users)]
+    anno_lo = anno[anno.userId.isin(lo_users)]
+    anno_med = anno[anno.userId.isin(med_users)]
 
     # calculate agreement
     alpha_quad, alpha_aro, alpha_val, alpha_emo = get_info_per_song(anno_hi)
     print('Agreement for high personalization:\nQuadrant: {}\nArousal: {}\nValence: {}\nEmotion: {}\n'.format(alpha_quad, alpha_aro, alpha_val, alpha_emo))
     alpha_quad, alpha_aro, alpha_val, alpha_emo = get_info_per_song(anno_med)
-    print('Agreement for low personalization:\nQuadrant: {}\nArousal: {}\nValence: {}\nEmotion: {}\n'.format(alpha_quad, alpha_aro, alpha_val, alpha_emo))
+    print('Agreement for medium personalization:\nQuadrant: {}\nArousal: {}\nValence: {}\nEmotion: {}\n'.format(alpha_quad, alpha_aro, alpha_val, alpha_emo))
     alpha_quad, alpha_aro, alpha_val, alpha_emo = get_info_per_song(anno_lo)
     print('Agreement for low personalization:\nQuadrant: {}\nArousal: {}\nValence: {}\nEmotion: {}\n'.format(alpha_quad, alpha_aro, alpha_val, alpha_emo))
     pdb.set_trace()
@@ -190,22 +190,22 @@ def load_json(filename):
 
 def get_info_per_song(anno):
     quadrant = pd.pivot_table(anno,
-                             index=['userid'],
+                             index=['userId'],
                              columns=['externalID'],
                              values=['quadrant'])
     alpha_quad = krippendorff.alpha(reliability_data=quadrant, level_of_measurement='nominal')
     arousal = pd.pivot_table(anno,
-                             index=['userid'],
+                             index=['userId'],
                              columns=['externalID'],
                              values=['arousalValue'])
     alpha_aro = krippendorff.alpha(reliability_data=arousal, level_of_measurement='nominal')
     valence = pd.pivot_table(anno,
-                             index=['userid'],
+                             index=['userId'],
                              columns=['externalID'],
                              values=['valenceValue'])
     alpha_val = krippendorff.alpha(reliability_data=valence, level_of_measurement='nominal')
     emotion = pd.pivot_table(anno,
-                             index=['userid'],
+                             index=['userId'],
                              columns=['externalID'],
                              values=['moodValueEnc'])
     alpha_emo = krippendorff.alpha(reliability_data=emotion, level_of_measurement='nominal')
@@ -246,7 +246,8 @@ if __name__ == "__main__":
 
     sl_df = get_stats(struc_df.reset_index(), user_list, modes, models, path_models_users)
 
-    dataset_anno = './data/data_24_11_2021.json'
+    # dataset_anno = './data/data_24_11_2021.json'
+    dataset_anno = './data/data_07_03_2022.json'
     data = load_json(dataset_anno)
     anno = pd.DataFrame(data['annotations'])
     users = pd.DataFrame(data['users'])

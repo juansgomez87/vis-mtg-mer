@@ -36,7 +36,8 @@ class Plotter():
                         'pos_pop': {'column': 'popularity', 'value': 0.1, 'operation': '>'},
                         'neg_pop': {'column': 'popularity', 'value': 0.1, 'operation': '<'}}
         # pure annotation data
-        anno_data = self.load_json('./data/data_24_11_2021.json')
+        # anno_data = self.load_json('./data/data_24_11_2021.json')
+        anno_data = self.load_json('./data/data_07_03_2022.json')
         self.anno = pd.DataFrame(anno_data['annotations'])
         self.anno['quadrant'] = list(map(self.aro_val_to_quads, self.anno['arousalValue'].tolist(), self.anno['valenceValue'].tolist()))
         self.anno['moodValueEnc'] = self.anno['moodValue'].map(self.tags_enc)
@@ -65,22 +66,22 @@ class Plotter():
     def get_info_per_song(self, anno, tags):
 
         quadrant = pd.pivot_table(anno,
-                                 index=['userid'],
+                                 index=['userId'],
                                  columns=['externalID'],
                                  values=['quadrant'])
         alpha_quad = krippendorff.alpha(reliability_data=quadrant, level_of_measurement='nominal')
         arousal = pd.pivot_table(anno,
-                                 index=['userid'],
+                                 index=['userId'],
                                  columns=['externalID'],
                                  values=['arousalValue'])
         alpha_aro = krippendorff.alpha(reliability_data=arousal, level_of_measurement='nominal')
         valence = pd.pivot_table(anno,
-                                 index=['userid'],
+                                 index=['userId'],
                                  columns=['externalID'],
                                  values=['valenceValue'])
         alpha_val = krippendorff.alpha(reliability_data=valence, level_of_measurement='nominal')
         emotion = pd.pivot_table(anno,
-                                 index=['userid'],
+                                 index=['userId'],
                                  columns=['externalID'],
                                  values=['moodValueEnc'])
         alpha_emo = krippendorff.alpha(reliability_data=emotion, level_of_measurement='nominal')
@@ -182,7 +183,7 @@ class Plotter():
                     target='_blank',
                     className='three columns'),
 
-                html.H3('MTG-MER: an open data set for personalized Music Emotion Recognition',
+                html.H3('TROMPA-MER: an open data set for personalized Music Emotion Recognition',
                         style={'text-align': 'right'},
                         className='nine columns'),
                 ]),

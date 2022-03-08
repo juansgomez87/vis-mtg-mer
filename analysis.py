@@ -214,14 +214,15 @@ def get_info_per_song(anno):
 
 if __name__ == "__main__":
     # usage: python3 make_plots.py
-    path_models_users = './models/users/'
-    path_models_users = './models/tests/users_q5_e10/'
+    # path_models_users = './models/users/'
+    # path_models_users = './models/users_q5_e10/'
+    path_models_users = './models/users_q4_e15/'
 
     # load data and format for plotting
     res_list = [os.path.join(root, f) for root, dirs, files in os.walk(path_models_users) for f in files if f.lower().endswith('f1.csv')]
     df_list = [pd.read_csv(_, index_col=[0, 1]) for _ in res_list]
-    user_list = [_.split('/')[3] for _ in res_list]
-    user_list = [_.split('/')[4] for _ in res_list]
+    # user_list = [_.split('/')[3] for _ in res_list]
+    user_list = [_.split('/')[-2] for _ in res_list]
 
     modes = ['hc', 'mix', 'mc', 'rand']
     models = ['classifier_gnb', 'classifier_sgd', 'classifier_xgb']

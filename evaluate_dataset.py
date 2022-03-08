@@ -58,7 +58,7 @@ class Evaluator():
         self.all_modes = ['hc', 'mix', 'rand', 'mc']
         self.mod_list = [os.path.join(root, f) for root, dirs, files in os.walk(self.path_to_models) for f in files if f.lower().endswith('.pkl')]
         # self.dict_class = {0: 'Q1', 1: 'Q2', 2: 'Q3', 3: 'Q4'}
-        self.seed = np.random.seed(1987)
+        self.seed = np.random.seed(1985)
 
 
     def aro_val_to_quads(self, aro, val):

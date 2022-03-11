@@ -35,7 +35,8 @@ class Evaluator():
     def __init__(self,
                  num_anno,
                  epochs,
-                 n_queries):
+                 n_queries,
+                 seed):
         """Constructor method
         """
         # dataset_anno = './data/data_24_11_2021.json'
@@ -44,7 +45,7 @@ class Evaluator():
         self.queries = n_queries
         self.dataset = pd.read_csv(dataset_fn, sep=';')
         self.path_to_models = './models/pretrained/'
-        self.path_models_users = './models/users_q{}_e{}/'.format(n_queries, epochs)
+        self.path_models_users = './models/users_q{}_e{}_s{}/'.format(n_queries, epochs, seed)
         self.epochs = epochs
         data = self.load_json(dataset_anno)
         anno = pd.DataFrame(data['annotations'])
@@ -58,7 +59,7 @@ class Evaluator():
         self.all_modes = ['hc', 'mix', 'rand', 'mc']
         self.mod_list = [os.path.join(root, f) for root, dirs, files in os.walk(self.path_to_models) for f in files if f.lower().endswith('.pkl')]
         # self.dict_class = {0: 'Q1', 1: 'Q2', 2: 'Q3', 3: 'Q4'}
-        self.seed = np.random.seed(1985)
+        self.seed = np.random.seed(seed)
 
 
     def aro_val_to_quads(self, aro, val):
@@ -311,13 +312,20 @@ if __name__ == "__main__":
                         required=True,
                         type=int,
                         dest='num_anno')
+    parser.add_argument('-s',
+                        '--seed',
+                        help='Select seed for randomicity (int)',
+                        action='store',
+                        required=True,
+                        type=int,
+                        dest='seed')
     args = parser.parse_args()
 
     if args.queries * args.epochs >= 0.85 * args.num_anno:
         print('The number of queries or epochs results in more queries than annotated songs!')
         sys.exit()
 
-    evaluator = Evaluator(args.num_anno, args.epochs, args.queries)
+    evaluator = Evaluator(args.num_anno, args.epochs, args.queries, args.seed)
 
     evaluator.run()
 

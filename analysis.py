@@ -216,7 +216,8 @@ if __name__ == "__main__":
     # usage: python3 make_plots.py
     # path_models_users = './models/users/'
     # path_models_users = './models/users_q5_e10/'
-    path_models_users = './models/users_q4_e15/'
+    # path_models_users = './models/users_q4_e15/'
+    path_models_users = './models/users_q9_e7/'
 
     # load data and format for plotting
     res_list = [os.path.join(root, f) for root, dirs, files in os.walk(path_models_users) for f in files if f.lower().endswith('f1.csv')]

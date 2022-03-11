@@ -19,7 +19,7 @@ Our data set is publicly available and we invite researchers to use it for testi
 
 With UPF-VPN: http://mirlab-web1.s.upf.edu:8050/vis-mtg-mer
 
-External: https://trompa.mtg.sb.upf.edu/vis-mtg-mer/
+External: https://trompa-mtg.upf.edu/vis-mtg-mer/
 
 ## Reproduce results
 

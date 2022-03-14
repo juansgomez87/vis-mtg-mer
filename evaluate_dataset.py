@@ -45,7 +45,7 @@ class Evaluator():
         self.queries = n_queries
         self.dataset = pd.read_csv(dataset_fn, sep=';')
         self.path_to_models = './models/pretrained/'
-        self.path_models_users = './models/users_q{}_e{}_bal_anno/'.format(n_queries, epochs)
+        self.path_models_users = './models/users_q{}_e{}_bal_anno_entr/'.format(n_queries, epochs)
         self.epochs = epochs
         data = self.load_json(dataset_anno)
         anno = pd.DataFrame(data['annotations'])
@@ -184,7 +184,7 @@ class Evaluator():
                         q_songs_full = this_hc_mode.iloc[q_ind].index.tolist()
                         if self.bal_flag:
                             # try balancing
-                            q_list_bal = []s_to_fill = self.queries - len(q_songs)
+                            q_list_bal = []
                             list_bal = this_anno_user.quadrant.unique().tolist() * int(self.queries / len(this_anno_user.quadrant.unique().tolist()))
                             for song in q_songs_full:
                                 this_class = this_dict[song]

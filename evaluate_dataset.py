@@ -45,7 +45,7 @@ class Evaluator():
         self.queries = n_queries
         self.dataset = pd.read_csv(dataset_fn, sep=';')
         self.path_to_models = './models/pretrained/'
-        self.path_models_users = './models/users_q{}_e{}_bal_anno_entr/'.format(n_queries, epochs)
+        self.path_models_users = './models/users_q{}_e{}_bal_anno/'.format(n_queries, epochs)
         self.epochs = epochs
         data = self.load_json(dataset_anno)
         anno = pd.DataFrame(data['annotations'])

@@ -179,22 +179,25 @@ class Evaluator():
                     # choose instances according to each consensus entropy approach
                     if mode == 'hc':
                         if self.bal_flag:
-                            q_songs = []
+                            q_songs_bal = []
                             # balance according to each class
                             for i in this_hc_mode.columns.tolist():
                                 other = this_hc_mode.columns.tolist()
                                 other.pop(i)
                                 this_hc_mode_q = this_hc_mode[(this_hc_mode[i] > this_hc_mode[other[0]]) & (this_hc_mode[i] > this_hc_mode[other[1]]) & (this_hc_mode[i] > this_hc_mode[other[2]])]
-                                # # in case a quadrant does not have more probability than all others...
-                                # if this_hc_mode_q.shape[0] == 0:
-                                #     pdb.set_trace()
                                 ent_hc_q = entropy(this_hc_mode_q, axis=1)
                                 q_ind_q = np.argsort(ent_hc_q)[::-1][:int(self.queries/4)]
-                                q_songs.extend(this_hc_mode_q.iloc[q_ind_q].index.tolist())
+                                q_songs_bal.extend(this_hc_mode_q.iloc[q_ind_q].index.tolist())
                             # print(this_hc_mode[this_hc_mode.index.isin(q_songs)])
-                            # # debugging
-                            # if len(q_songs) != self.queries:
-                            #     pdb.set_trace()
+                            # debugging
+                            if len(q_songs_bal) != self.queries:
+                                s_to_fill = self.queries - len(q_songs_bal)
+                                this = this_hc_mode[~this_hc_mode.index.isin(q_songs_bal)]
+                                ent = entropy(this, axis=1)
+                                q_ind = np.argsort(ent)[::-1][:s_to_fill]
+                                q_songs_bal.extend(this.iloc[q_ind].index.tolist())
+                            q_songs = q_songs_bal
+
                         else:
                             # human consensus (HC)
                             ent_hc = entropy(this_hc_mode, axis=1)
@@ -218,7 +221,7 @@ class Evaluator():
                                                       index=y_probs.index)
 
                         if self.bal_flag:
-                            q_songs = []
+                            q_songs_bal = []
                             # balance according to each class
                             for i in consensus_prob.columns.tolist():
                                 other = consensus_prob.columns.tolist()
@@ -226,10 +229,15 @@ class Evaluator():
                                 consensus_prob_q = consensus_prob[(consensus_prob[i] > consensus_prob[other[0]]) & (consensus_prob[i] > consensus_prob[other[1]]) & (consensus_prob[i] > consensus_prob[other[2]])]
                                 ent_q = entropy(consensus_prob_q, axis=1)
                                 q_ind_q = np.argsort(ent_q)[::-1][:int(self.queries/4)]
-                                q_songs.extend(consensus_prob_q.iloc[q_ind_q].index.tolist())
+                                q_songs_bal.extend(consensus_prob_q.iloc[q_ind_q].index.tolist())
                             # print(consensus_prob[consensus_prob.index.isin(q_songs)])
-                            # if len(q_songs) != self.queries:
-                            #     pdb.set_trace()
+                            if len(q_songs_bal) != self.queries:
+                                s_to_fill = self.queries - len(q_songs_bal)
+                                this = consensus_prob[~consensus_prob.index.isin(q_songs_bal)]
+                                ent = entropy(this, axis=1)
+                                q_ind = np.argsort(ent)[::-1][:s_to_fill]
+                                q_songs_bal.extend(this.iloc[q_ind].index.tolist())
+                            q_songs = q_songs_bal
                         else:
                             # entropy calculation
                             ent = entropy(consensus_prob, axis=1)
@@ -257,7 +265,7 @@ class Evaluator():
                         mix_consensus = mix_consensus.groupby('s_id').mean()
 
                         if self.bal_flag:
-                            q_songs = []
+                            q_songs_bal = []
                             # balance according to each class
                             for i in mix_consensus.columns.tolist():
                                 other = mix_consensus.columns.tolist()
@@ -265,10 +273,15 @@ class Evaluator():
                                 mix_consensus_q = mix_consensus[(mix_consensus[i] > mix_consensus[other[0]]) & (mix_consensus[i] > mix_consensus[other[1]]) & (mix_consensus[i] > mix_consensus[other[2]])]
                                 ent_q = entropy(mix_consensus_q, axis=1)
                                 q_ind_q = np.argsort(ent_q)[::-1][:int(self.queries/4)]
-                                q_songs.extend(mix_consensus_q.iloc[q_ind_q].index.tolist())
+                                q_songs_bal.extend(mix_consensus_q.iloc[q_ind_q].index.tolist())
                             # print(mix_consensus[mix_consensus.index.isin(q_songs)])
-                            # if len(q_songs) != self.queries:
-                            #     pdb.set_trace()
+                            if len(q_songs_bal) != self.queries:
+                                s_to_fill = self.queries - len(q_songs_bal)
+                                this = mix_consensus[~mix_consensus.index.isin(q_songs_bal)]
+                                ent = entropy(this, axis=1)
+                                q_ind = np.argsort(ent)[::-1][:s_to_fill]
+                                q_songs_bal.extend(this.iloc[q_ind].index.tolist())
+                            q_songs = q_songs_bal
                         else:
                             # entropy calculation
                             ent_mix = entropy(mix_consensus, axis=1)

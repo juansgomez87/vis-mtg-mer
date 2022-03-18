@@ -480,7 +480,7 @@ class Plotter():
 
             # calculate inter-rater agreement
             alpha_quad, alpha_aro, alpha_val, alpha_emo = self.get_info_per_song(this_anno, self.tags_enc)
-            txt_agr = html.P(['Inter-rater agreement from selection:', 
+            txt_agr = html.P(['Inter-rater agreement of {} songs and {} annotations:'.format(len(this_songs), this_anno.shape[0]), 
                              html.Br(),
                              'Quadrants: {:.3f}'.format(alpha_quad),
                              html.Br(),

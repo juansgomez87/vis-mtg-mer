@@ -594,8 +594,8 @@ dash_app = dash.Dash(
                 "content": "width=device-width"}],
     external_stylesheets=external_stylesheets,
     # comment two following lines for local tests
-    # routes_pathname_prefix='/',
-    # requests_pathname_prefix='/vis-mtg-mer/',
+    routes_pathname_prefix='/',
+    requests_pathname_prefix='/vis-mtg-mer/',
     serve_locally=False)
 
 app = dash_app.server

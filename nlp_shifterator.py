@@ -100,7 +100,7 @@ def free_words_shift(anno, sh):
                            cumulative_inset=False,
                            show_plot=False,
                            ax=axi,
-                           filename='./figs_paper/freetext_{}.svg'.format(sh))     
+                           filename='./figs_paper/freetext_{}.svg'.format(sh))
 
 
 def reasoning_shift(anno, sh):
@@ -163,7 +163,8 @@ def reasoning_shift(anno, sh):
                            cumulative_inset=False,
                            show_plot=False,
                            ax=axi,
-                           filename='./figs_paper/core_vs_words_{}.svg'.format(sh))        
+                           filename='./figs_paper/core_vs_words_{}.svg'.format(sh))
+  
 
 
 
@@ -195,9 +196,8 @@ if __name__ == "__main__":
     anno = clean_text(anno, 'valenceComment')
     anno = clean_text(anno, 'moodComment')
 
-    free_words_shift(anno, args.shifter)
-
     reasoning_shift(anno, args.shifter)
 
+    free_words_shift(anno, args.shifter)
     # pdb.set_trace()
 

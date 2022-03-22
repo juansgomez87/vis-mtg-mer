@@ -55,10 +55,10 @@ python3 nlp_shifterator.py -shift [proportion [prop], Shannon-Entropy [shan], Je
 
 #### To reproduce personalization results:
 
-Contact juansebastian.gomez[at]upf[dot]edu to receive the processed feature set. We use only data from users that annotated more than 80 excerpts, and perform 10 iterations with 5 queries each.
+Contact juansebastian.gomez[at]upf[dot]edu to receive the processed feature set. We use only data from users that annotated more than 80 excerpts, and perform 15 iterations with 4 queries each. We also attempt to balance queries according to the probability of each quadrant.
 
 ```
-python3 evaluate_dataset.py -n 80 -e 10 -q 5
+python3 evaluate_dataset.py -n 80 -q 4 -e 15 -b True
 ```
 
 The previous step will train all models for all users - it will take approximately 2 hours. After the process is complete, you need to analyze the results:

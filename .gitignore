@@ -1,8 +1,7 @@
 trompa-venv/
 data/dataset_feats.csv
 models/users/*
-models/users_q5_e10/*
-models/tests/*
+evaluate_dataset_anno.py
 
 !models/users/.gitkeep
 

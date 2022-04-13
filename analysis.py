@@ -62,6 +62,26 @@ def get_stats(df, user_list, cons_types, mod_types, path):
     data_cols = df.columns[5:].tolist()
     cons_comb = list(itertools.combinations(cons_types, 2))
 
+    pdb.set_trace()
+    print('anova by model by at the final iteration')
+    import statsmodels.api as sm
+    from statsmodels.formula.api import ols
+    new_data_cols = {_:('it_'+_) for _ in data_cols}
+    anova_df = df.rename(columns=new_data_cols)
+    mod = ols('it_14 ~ model + consensus  + user', data=anova_df).fit()
+    mod.summary()
+    mod.summary2()
+
+    aov_table = sm.stats.anova_lm(mod, typ=2)
+    print(aov_table)
+
+    # two way anova with repeated measures
+    anova_df_mean_ens = anova_df.groupby(['user', 'model', 'consensus', 'iteration']).mean().reset_index()
+    mod = sm.stats.AnovaRM(anova_df_mean_ens, 'it_14', 'user', within=['model', 'consensus','iteration'])
+    res = mod.fit()
+    print(res)
+    pdb.set_trace()
+
     print('one-sided t-test by model by point')
     t_test = {}
     for mod in mod_types:

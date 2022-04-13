@@ -25,6 +25,8 @@ def make_plots(df, user_list, cons_types, mod_types, path):
     c_lev = c_ints[95]
 
     plt.figure(figsize=(12, 5))
+    plt.rc('xtick', labelsize=8)
+    plt.rc('ytick', labelsize=8)
     for i, mod in enumerate(mod_types):
         plt.subplot(1, 3, i + 1)
         for cons in cons_types:
@@ -215,12 +217,14 @@ def get_info_per_song(anno):
 if __name__ == "__main__":
     # usage: python3 analysis.py
     path_models_users = './models/users_q4_e15_bal_anno/'
+    path_models_users = './models/users/users_q4_e15/'
 
     # load data and format for plotting
     res_list = [os.path.join(root, f) for root, dirs, files in os.walk(path_models_users) for f in files if f.lower().endswith('f1.csv')]
     df_list = [pd.read_csv(_, index_col=[0, 1]) for _ in res_list]
     # user_list = [_.split('/')[3] for _ in res_list]
     user_list = [_.split('/')[-2] for _ in res_list]
+    
 
     modes = ['hc', 'mix', 'mc', 'rand']
     models = ['classifier_gnb', 'classifier_sgd', 'classifier_xgb']

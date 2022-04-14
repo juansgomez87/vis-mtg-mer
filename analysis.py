@@ -15,6 +15,7 @@ import pdb
 import matplotlib.pyplot as plt
 import itertools
 from scipy import stats
+import statsmodels.api as sm
 
 from collections import Counter
 import krippendorff
@@ -24,15 +25,19 @@ def make_plots(df, user_list, cons_types, mod_types, path):
     c_ints = {90: 1.64, 95: 1.96, 99: 2.33, 99.5: 2.58}
     c_lev = c_ints[95]
 
-    plt.figure(figsize=(12, 5))
-    plt.rc('xtick', labelsize=8)
-    plt.rc('ytick', labelsize=8)
+    new_data_cols = {'initial': 'init'}
+    df = df.rename(columns=new_data_cols)
+
+    # pdb.set_trace()
+    plt.figure(figsize=(12, 4.2))
+    plt.rc('xtick', labelsize=9)
+    plt.rc('ytick', labelsize=9)
     for i, mod in enumerate(mod_types):
         plt.subplot(1, 3, i + 1)
         for cons in cons_types:
-            mean = df[(df.model == mod) & (df.consensus == cons)].loc[:, 'initial':].mean()
-            std = df[(df.model == mod) & (df.consensus == cons)].loc[:, 'initial':].std()
-            cnt = df[(df.model == mod) & (df.consensus == cons)].loc[:, 'initial':].count()
+            mean = df[(df.model == mod) & (df.consensus == cons)].loc[:, 'init':].mean()
+            std = df[(df.model == mod) & (df.consensus == cons)].loc[:, 'init':].std()
+            cnt = df[(df.model == mod) & (df.consensus == cons)].loc[:, 'init':].count()
 
             c_i = c_lev * std / np.sqrt(cnt)
             # texts
@@ -62,25 +67,21 @@ def get_stats(df, user_list, cons_types, mod_types, path):
     data_cols = df.columns[5:].tolist()
     cons_comb = list(itertools.combinations(cons_types, 2))
 
-    pdb.set_trace()
-    print('anova by model by at the final iteration')
-    import statsmodels.api as sm
-    from statsmodels.formula.api import ols
-    new_data_cols = {_:('it_'+_) for _ in data_cols}
-    anova_df = df.rename(columns=new_data_cols)
-    mod = ols('it_14 ~ model + consensus  + user', data=anova_df).fit()
-    mod.summary()
-    mod.summary2()
 
-    aov_table = sm.stats.anova_lm(mod, typ=2)
-    print(aov_table)
+    # print('anova by model by at the final iteration')
+    
+    # # from statsmodels.formula.api import ols
+    # new_data_cols = {_:('epoch_'+_) for _ in data_cols}
+    # anova_df = df.rename(columns=new_data_cols)
 
-    # two way anova with repeated measures
-    anova_df_mean_ens = anova_df.groupby(['user', 'model', 'consensus', 'iteration']).mean().reset_index()
-    mod = sm.stats.AnovaRM(anova_df_mean_ens, 'it_14', 'user', within=['model', 'consensus','iteration'])
-    res = mod.fit()
-    print(res)
-    pdb.set_trace()
+    # # # two way anova with repeated measures
+    # mod = sm.stats.AnovaRM(anova_df, 'epoch_14', 'user', within=['model', 'consensus', 'iteration'])
+    # res = mod.fit()
+    # print(res)
+
+    # mod = sm.stats.AnovaRM(anova_df, 'epoch_14', 'user', within=['model', 'consensus'], aggregate_func='mean')
+    # res = mod.fit()
+    # print(res)
 
     print('one-sided t-test by model by point')
     t_test = {}
@@ -153,7 +154,7 @@ def get_stats(df, user_list, cons_types, mod_types, path):
     norm_hist_slopes = hist_slopes / len(user_list)
     norm_hist_slopes = norm_hist_slopes[['hc', 'mc', 'mix', 'rand']]
 
-    hist_slopes.plot(kind='bar', rot=0, alpha=0.7, figsize=(6, 3))
+    hist_slopes.plot(kind='bar', rot=0, alpha=0.7, figsize=(6, 2.5))
     plt.xlabel('Model')
     plt.ylabel('# of users')
     plt.tight_layout()
@@ -162,7 +163,7 @@ def get_stats(df, user_list, cons_types, mod_types, path):
 
     return slope_df
 
-def analyze_users(slope_df, anno, users):
+def analyze_users(slope_df, anno, users, scores_df):
     # analyze user behavior
     slope_df['pos'] += 0
     sum_us = slope_df.groupby(['user'])['pos'].sum()
@@ -182,6 +183,29 @@ def analyze_users(slope_df, anno, users):
     anno_hi = anno[anno.userId.isin(hi_users)]
     anno_lo = anno[anno.userId.isin(lo_users)]
     anno_med = anno[anno.userId.isin(med_users)]
+
+
+    # # # two way anova with repeated measures by personalization groups
+    # lo_df = scores_df[scores_df.user.isin(lo_users)]
+    # mod = sm.stats.AnovaRM(lo_df, '14', 'user', within=['model', 'consensus', 'iteration'])
+    # res = mod.fit()
+    # print('Low personalization user group anova')
+    # print(res)
+    # med_df = scores_df[scores_df.user.isin(med_users)]
+    # mod = sm.stats.AnovaRM(lo_df, '14', 'user', within=['model', 'consensus', 'iteration'])
+    # res = mod.fit()
+    # print('Medium personalization user group anova')
+    # print(res)
+    # hi_df = scores_df[scores_df.user.isin(hi_users)]
+    # mod = sm.stats.AnovaRM(lo_df, '14', 'user', within=['model', 'consensus', 'iteration'])
+    # res = mod.fit()
+    # print('High personalization user group anova')
+    # print(res)
+    # modes = ['hc', 'mix', 'mc', 'rand']
+    # models = ['classifier_gnb', 'classifier_sgd', 'classifier_xgb']
+    # path_models_users = './models/users/users_q4_e15_bal_entr/'
+    # make_plots(hi_df.reset_index(drop=True), user_list, modes, models, path_models_users)
+    # pdb.set_trace()
 
     # calculate agreement
     alpha_quad, alpha_aro, alpha_val, alpha_emo = get_info_per_song(anno_hi)
@@ -236,8 +260,8 @@ def get_info_per_song(anno):
 
 if __name__ == "__main__":
     # usage: python3 analysis.py
-    path_models_users = './models/users_q4_e15_bal_anno/'
-    path_models_users = './models/users/users_q4_e15/'
+    path_models_users = './models/users/users_q4_e15_bal_entr/'
+
 
     # load data and format for plotting
     res_list = [os.path.join(root, f) for root, dirs, files in os.walk(path_models_users) for f in files if f.lower().endswith('f1.csv')]
@@ -275,5 +299,5 @@ if __name__ == "__main__":
     anno = pd.DataFrame(data['annotations'])
     users = pd.DataFrame(data['users'])
 
-    analyze_users(sl_df, anno, users)
+    analyze_users(sl_df, anno, users, struc_df.reset_index())
     

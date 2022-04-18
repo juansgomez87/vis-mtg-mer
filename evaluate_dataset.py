@@ -45,7 +45,7 @@ class Evaluator():
         self.queries = n_queries
         self.dataset = pd.read_csv(dataset_fn, sep=';')
         self.path_to_models = './models/pretrained/'
-        self.path_models_users = './models/users_q{}_e{}_bal_entr/'.format(n_queries, epochs)
+        self.path_models_users = './models/users/users_q{}_e{}_bal_entr/'.format(n_queries, epochs)
         self.epochs = epochs
         data = self.load_json(dataset_anno)
         anno = pd.DataFrame(data['annotations'])
@@ -59,7 +59,7 @@ class Evaluator():
         self.all_modes = ['hc', 'mix', 'rand', 'mc']
         self.mod_list = [os.path.join(root, f) for root, dirs, files in os.walk(self.path_to_models) for f in files if f.lower().endswith('.pkl')]
         # self.dict_class = {0: 'Q1', 1: 'Q2', 2: 'Q3', 3: 'Q4'}
-        self.seed = np.random.seed(1958)
+        self.seed = np.random.seed(1957)
         self.bal_flag = bal_flag
 
 

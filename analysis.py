@@ -322,8 +322,9 @@ def get_info_per_song(anno):
 
 if __name__ == "__main__":
     # usage: python3 analysis.py
-    path_models_users = './models/users/users_q4_e15_bal_entr/'
-    path_models_users = './models/users/users_q4_e15_bal_entr_old/'
+    path_models_users = './models/users/users_q4_e15_bal_entr_s87/'
+    path_models_users = './models/users/users_q4_e15_bal_entr_s1960/'
+    # path_models_users = './models/users/users_q4_e15_bal_entr_old/'
     # path_models_users = './models/users/users_q4_e15_bal_anno/'
 
 

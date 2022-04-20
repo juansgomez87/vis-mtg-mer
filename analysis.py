@@ -175,6 +175,7 @@ def analyze_users(slope_df, anno, users, scores_df):
     print('Agreement for medium personalization:\nQuadrant: {}\nArousal: {}\nValence: {}\nEmotion: {}\n'.format(alpha_quad, alpha_aro, alpha_val, alpha_emo))
     alpha_quad, alpha_aro, alpha_val, alpha_emo = get_info_per_song(anno_lo)
     print('Agreement for low personalization:\nQuadrant: {}\nArousal: {}\nValence: {}\nEmotion: {}\n'.format(alpha_quad, alpha_aro, alpha_val, alpha_emo))
+    pdb.set_trace()
     return hi_users, med_users, lo_users
 
 
@@ -187,20 +188,20 @@ def anova_tests(df, hi_users, med_users, lo_users):
     df.loc[df.user.isin(lo_users), 'type'] = 'low'
     df.loc[df.user.isin(med_users), 'type'] = 'medium'
     df.loc[df.user.isin(hi_users), 'type'] = 'high'
-
-    # two way anova with repeated measures
-    print('-----\nAnova and Tukey HSD for complete data\n')
-    mod = sm.stats.AnovaRM(df, 'epoch_14', 'user', within=['model', 'consensus', 'iteration'])
-    res = mod.fit()
-    print('ANOVA')
-    print(res)
-    print('Tukey HSD')
-    print(sm.stats.multicomp.pairwise_tukeyhsd(df.epoch_14.tolist(), df.model.tolist()))
-    print(sm.stats.multicomp.pairwise_tukeyhsd(df.epoch_14.tolist(), df.consensus.tolist()))
-    print(sm.stats.multicomp.pairwise_tukeyhsd(df.epoch_14.tolist(), df.type.tolist()))
-    print(sm.stats.multicomp.pairwise_tukeyhsd(df.epoch_14.tolist(), df.iteration.tolist()))
-
     pdb.set_trace()
+
+    # # two way anova with repeated measures
+    # print('-----\nAnova and Tukey HSD for complete data\n')
+    # mod = sm.stats.AnovaRM(df, 'epoch_14', 'user', within=['model', 'consensus', 'iteration'])
+    # res = mod.fit()
+    # print('ANOVA')
+    # print(res)
+    # print('Tukey HSD')
+    # print(sm.stats.multicomp.pairwise_tukeyhsd(df.epoch_14.tolist(), df.model.tolist()))
+    # print(sm.stats.multicomp.pairwise_tukeyhsd(df.epoch_14.tolist(), df.consensus.tolist()))
+    # print(sm.stats.multicomp.pairwise_tukeyhsd(df.epoch_14.tolist(), df.type.tolist()))
+    # print(sm.stats.multicomp.pairwise_tukeyhsd(df.epoch_14.tolist(), df.iteration.tolist()))
+
     print('Separation by model type: SGD, GNB, XGB')
     df_gnb = df[df.model == 'classifier_gnb']
     df_sgd = df[df.model == 'classifier_sgd']
@@ -234,47 +235,24 @@ def anova_tests(df, hi_users, med_users, lo_users):
     print(sm.stats.multicomp.pairwise_tukeyhsd(df_xgb.epoch_14.tolist(), df_xgb.iteration.tolist()))
 
 
+    # marginal mean plots
+    plt.title('Marginal mean plot for model:consensus')
+    plt.plot(df_gnb.groupby(['consensus']).mean().epoch_14, label='GNB')
+    plt.plot(df_sgd.groupby(['consensus']).mean().epoch_14, label='SGD')
+    plt.plot(df_xgb.groupby(['consensus']).mean().epoch_14, label='XGB')
+    plt.legend()
+    plt.show()
+
+    plt.title('Marginal mean plot for model:iteration')
+    plt.plot(df_gnb.groupby(['iteration']).mean().epoch_14, label='GNB')
+    plt.plot(df_sgd.groupby(['iteration']).mean().epoch_14, label='SGD')
+    plt.plot(df_xgb.groupby(['iteration']).mean().epoch_14, label='XGB')
+    plt.legend()
+    plt.show()
+
+    df_gnb.boxplot('epoch_14', by=['consensus', 'iteration'])
+    plt.show()
     pdb.set_trace()
-    # taking the mean over iterations results in removing cross-validation variability!
-    # print('-----\nAnova and Tukey HSD data with mean across iterations of pretraining cross-validation\n')
-    # df_no_it = df.groupby(['user', 'model', 'consensus', 'type']).mean().reset_index()
-    # # two way anova with repeated measures 
-    # mod = sm.stats.AnovaRM(df_no_it, 'epoch_14', 'user', within=['model', 'consensus'])
-    # res = mod.fit()
-    # print('ANOVA')
-    # print(res)
-    # print('Tukey HSD')
-    # print(sm.stats.multicomp.pairwise_tukeyhsd(df_no_it.epoch_14.tolist(), df_no_it.model.tolist()))
-    # print(sm.stats.multicomp.pairwise_tukeyhsd(df_no_it.epoch_14.tolist(), df_no_it.consensus.tolist()))
-    # print('Separation by model type: SGD, GNB, XGB')
-    # df_gnb = df_no_it[df_no_it.model == 'classifier_gnb']
-    # df_sgd = df_no_it[df_no_it.model == 'classifier_sgd']
-    # df_xgb = df_no_it[df_no_it.model == 'classifier_xgb']
-    # # Model GNB
-    # mod = sm.stats.AnovaRM(df_gnb, 'epoch_14', 'user', within=['consensus'])
-    # res = mod.fit()
-    # print('ANOVA GNB')
-    # print(res)
-    # print('Tukey HSD GNB')
-    # print(sm.stats.multicomp.pairwise_tukeyhsd(df_gnb.epoch_14.tolist(), df_gnb.consensus.tolist()))
-    # print(sm.stats.multicomp.pairwise_tukeyhsd(df_gnb.epoch_14.tolist(), df_gnb.type.tolist()))
-    # # Model SGD
-    # mod = sm.stats.AnovaRM(df_sgd, 'epoch_14', 'user', within=['consensus'])
-    # res = mod.fit()
-    # print('ANOVA SGD')
-    # print(res)
-    # print('Tukey HSD SGD')
-    # print(sm.stats.multicomp.pairwise_tukeyhsd(df_sgd.epoch_14.tolist(), df_sgd.consensus.tolist()))
-    # print(sm.stats.multicomp.pairwise_tukeyhsd(df_sgd.epoch_14.tolist(), df_sgd.type.tolist()))
-    # # Model XGB
-    # mod = sm.stats.AnovaRM(df_xgb, 'epoch_14', 'user', within=['consensus'])
-    # res = mod.fit()
-    # print('ANOVA XGB')
-    # print(res)
-    # print('Tukey HSD XGB')
-    # print(sm.stats.multicomp.pairwise_tukeyhsd(df_xgb.epoch_14.tolist(), df_xgb.consensus.tolist()))
-    # print(sm.stats.multicomp.pairwise_tukeyhsd(df_xgb.epoch_14.tolist(), df_xgb.type.tolist()))
-    # pdb.set_trace()
 
 
 
@@ -323,7 +301,7 @@ def get_info_per_song(anno):
 if __name__ == "__main__":
     # usage: python3 analysis.py
     path_models_users = './models/users/users_q4_e15_bal_entr_s87/'
-    path_models_users = './models/users/users_q4_e15_bal_entr_s1960/'
+    # path_models_users = './models/users/users_q4_e15_bal_entr_s1960/'
     # path_models_users = './models/users/users_q4_e15_bal_entr_old/'
     # path_models_users = './models/users/users_q4_e15_bal_anno/'
 

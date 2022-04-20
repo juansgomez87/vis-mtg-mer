@@ -36,8 +36,7 @@ class Evaluator():
                  num_anno,
                  epochs,
                  n_queries,
-                 bal_flag,
-                 seed):
+                 bal_flag):
         """Constructor method
         """
         # dataset_anno = './data/data_24_11_2021.json'
@@ -46,8 +45,7 @@ class Evaluator():
         self.queries = n_queries
         self.dataset = pd.read_csv(dataset_fn, sep=';')
         self.path_to_models = './models/pretrained/'
-        # self.path_models_users = './models/users/users_q{}_e{}_bal_entr/'.format(n_queries, epochs)
-        self.path_models_users = './models/users/users_q{}_e{}_bal_entr_s{}/'.format(n_queries, epochs, str(seed))
+        self.path_models_users = './models/users/users_q{}_e{}_bal_entr/'.format(n_queries, epochs)
         self.epochs = epochs
         data = self.load_json(dataset_anno)
         anno = pd.DataFrame(data['annotations'])
@@ -61,7 +59,7 @@ class Evaluator():
         self.all_modes = ['hc', 'mix', 'rand', 'mc']
         self.mod_list = [os.path.join(root, f) for root, dirs, files in os.walk(self.path_to_models) for f in files if f.lower().endswith('.pkl')]
         # self.dict_class = {0: 'Q1', 1: 'Q2', 2: 'Q3', 3: 'Q4'}
-        self.seed = np.random.seed(seed)
+        self.seed = np.random.seed(87)
         self.bal_flag = bal_flag
 
 
@@ -386,14 +384,6 @@ if __name__ == "__main__":
                         type=int,
                         dest='num_anno')
 
-    parser.add_argument('-s',
-                        '--seed',
-                        help='Select minimum number of annotations per user (int)',
-                        action='store',
-                        required=True,
-                        type=int,
-                        dest='seed')
-
     args = parser.parse_args()
 
     if args.queries * args.epochs >= 0.85 * args.num_anno:
@@ -405,7 +395,7 @@ if __name__ == "__main__":
         if args.queries % 4 != 0:
             print('If you want to balance the entropy calculator, select number of queries as multiple of classes (i.e., 4 or 8)')
 
-    evaluator = Evaluator(args.num_anno, args.epochs, args.queries, args.balanced, int(args.seed))
+    evaluator = Evaluator(args.num_anno, args.epochs, args.queries, args.balanced)
 
     evaluator.run()
 

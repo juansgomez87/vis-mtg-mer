@@ -1,8 +1,8 @@
 # TROMPA-MER: an open data set for personalized Music Emotion Recognition
 
-Source code to reproduce experiments and visualisation platform presented to IEEE Transactions on Affective Computing 2021.
+Source code to reproduce experiments and visualization platform presented to Journal of Intelligent Information Systems.
 
--- Juan Sebastián Gómez-Cañón, Nicolás Gutiérrez-Páez, Lorenzo Porcaro, Alastair Porter, Estefanía Cano, Perfecto Herrera, Aggelos Gkiokas, Patricia Santos, Davinia Hernández-Leo, Casper Karreman, and Emilia Gómez
+-- Juan Sebastián Gómez-Cañón, Nicolás Gutiérrez-Páez, Lorenzo Porcaro, Alastair Porter, Estefanía Cano, Perfecto Herrera-Boyer, Aggelos Gkiokas, Patricia Santos, Davinia Hernández-Leo, Casper Karreman, and Emilia Gómez
 
 ## Abstract
 
@@ -82,3 +82,27 @@ Or simply compose the docker image:
 ```
 docker-compose up
 ```
+## Publication
+
+```
+@article{GomezCanon2022JIIS,
+author = {Gómez-Cañón, Juan Sebastián and 
+          Gutiérrez-Páez, Nicolás and
+          Porcaro, Lorenzo and
+          Cano, Estefanía and 
+          Herrera-Boyer, Perfecto and 
+          Gkiokas, Aggelos and
+          Santos, Patricia and
+          Hernández-Leo, Davinia and
+          Karreman, Casper and
+          Gómez, Emilia},
+title = {{TROMPA-MER: an open dataset for personalized Music Emotion Recognition}},
+journal = {Journal of Intelligent Information Systems},
+volume = {},
+issue = {},
+year = {2022},
+pages={},
+doi = {10.21203/rs.3.rs-1926421/v1}
+}
+```
+

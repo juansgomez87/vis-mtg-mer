@@ -101,8 +101,8 @@ journal = {Journal of Intelligent Information Systems},
 volume = {},
 issue = {},
 year = {2022},
-pages={},
-doi = {10.21203/rs.3.rs-1926421/v1}
+pages={1-22},
+doi = {10.1007/s10844-022-00746-0}
 }
 ```
 
